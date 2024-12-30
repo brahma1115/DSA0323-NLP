@@ -1,0 +1,86 @@
+class ParseTreeNode:
+    def __init__(self, symbol, children=None):
+        self.symbol = symbol
+        self.children = children if children is not None else []
+
+    def __repr__(self, level=0):
+        ret = "\t" * level + repr(self.symbol) + "\n"
+        for child in self.children:
+            ret += child.__repr__(level + 1)
+        return ret
+
+class CFGParser:
+    def __init__(self, grammar):
+        self.grammar = grammar
+
+    def parse(self, sentence, start_symbol="S"):
+        # Start parsing from the start symbol
+        tree = self._parse_recursive(sentence, start_symbol)
+        if tree and len(sentence) == 0:
+            return tree
+        else:
+            return None  # Parsing failed
+
+    def _parse_recursive(self, sentence, symbol):
+        if not sentence:
+            return None  # If the sentence is empty but we're expecting more symbols, fail
+
+        # If the symbol is a terminal (word in sentence)
+        if self._is_terminal(symbol):
+            if sentence[0] == symbol:
+                return ParseTreeNode(symbol, [])
+            else:
+                return None  # Terminal does not match
+
+        # If the symbol is non-terminal, try to expand it
+        if symbol in self.grammar:
+            for production in self.grammar[symbol]:
+                tree = self._apply_production(sentence, production)
+                if tree is not None:
+                    return tree
+        return None  # No valid production found
+
+    def _apply_production(self, sentence, production):
+        children = []
+        remaining_sentence = sentence
+
+        for symbol in production:
+            subtree = self._parse_recursive(remaining_sentence, symbol)
+            if subtree is None:
+                return None  # If any symbol in the production fails, the production fails
+            children.append(subtree)
+            # Update the remaining sentence after consuming the matched symbol
+            remaining_sentence = remaining_sentence[len(subtree.symbol):]
+
+        # If we managed to parse all symbols of the production
+        return ParseTreeNode(symbol=production[0], children=children)
+
+    def _is_terminal(self, symbol):
+        return not isinstance(symbol, str) or symbol.islower()
+
+
+# Example Grammar
+grammar = {
+    'S': [['NP', 'VP']],
+    'NP': [['Det', 'N']],
+    'VP': [['V', 'NP']],
+    'Det': ['a', 'the'],
+    'N': ['cat', 'dog'],
+    'V': ['chases', 'sees']
+}
+
+# Example input sentence
+sentence = ['the', 'cat', 'chases', 'a', 'dog']
+
+# Initialize parser with the grammar
+parser = CFGParser(grammar)
+
+# Parse the sentence and generate the parse tree
+parse_tree = parser.parse(sentence)
+
+# Output the parse tree
+if parse_tree:
+    print("Parse tree generated successfully:")
+    print(parse_tree)
+else:
+    print("Parsing failed.")
