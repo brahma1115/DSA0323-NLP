@@ -1,0 +1,65 @@
+class EarleyParser:
+    def __init__(self, grammar):
+        # Initialize the grammar as a dictionary
+        self.grammar = grammar
+        self.start_symbol = 'S'
+
+    # Helper function to check if a string is a terminal symbol
+    def is_terminal(self, symbol):
+        return symbol.islower()
+
+    # The Earley parser function
+    def parse(self, input_string):
+        n = len(input_string)
+        # Initialize the chart (list of states for each position in the input string)
+        chart = [[] for _ in range(n + 1)]
+        chart[0].append(('S', 0, 0))  # Start with the start symbol S at position 0
+
+        # Function to apply the Earley algorithm
+        for i in range(n + 1):
+            for state in chart[i]:
+                rule, dot, origin = state
+                # If the dot has not reached the end of the production
+                if dot < len(rule):
+                    next_symbol = rule[dot]
+                    if self.is_terminal(next_symbol):
+                        if i < n and input_string[i] == next_symbol:
+                            chart[i + 1].append((rule, dot + 1, origin))
+                    else:
+                        # If it's a non-terminal, predict its possible productions
+                        for production in self.grammar.get(next_symbol, []):
+                            chart[i].append((production, 0, i))
+                else:
+                    # Completion: the production is fully matched
+                    if rule == ['S'] and i == n:
+                        return True
+                    chart[i].append((rule, dot, origin))
+
+        return False
+
+
+# Example grammar and test case
+grammar = {
+    'S': [['a', 'A', 'b']],
+    'A': [['c'], []]  # A -> c | ε (empty string)
+}
+
+# Create an instance of the Earley parser
+parser = EarleyParser(grammar)
+
+# Test the parser with an input string
+input_string_1 = 'acb'
+input_string_2 = 'ab'
+
+# Run the parser and print the result
+print("Parsing string:", input_string_1)
+if parser.parse(input_string_1):
+    print("Parsing Successful")
+else:
+    print("Parsing Failed")
+
+print("\nParsing string:", input_string_2)
+if parser.parse(input_string_2):
+    print("Parsing Successful")
+else:
+    print("Parsing Failed")
