@@ -1,0 +1,57 @@
+import re
+
+# Define the subject and verb rules for agreement
+subject_singular = ['I', 'he', 'she', 'it', 'dog']
+subject_plural = ['they', 'we', 'dogs']
+verb_singular = ['is', 'was', 'has']
+verb_plural = ['are', 'were', 'have']
+
+def check_agreement(sentence):
+    # Tokenize the sentence into words
+    words = sentence.split()
+    
+    # Initialize variables for subject and verb
+    subject = None
+    verb = None
+    
+    # Check for subject (first word as a basic assumption)
+    for word in words:
+        if word.lower() in subject_singular:
+            subject = 'singular'
+            break
+        elif word.lower() in subject_plural:
+            subject = 'plural'
+            break
+    
+    # Check for verb (second word as a basic assumption)
+    for word in words:
+        if word.lower() in verb_singular:
+            verb = 'singular'
+            break
+        elif word.lower() in verb_plural:
+            verb = 'plural'
+            break
+    
+    # Check if subject and verb match in number
+    if subject and verb:
+        if subject == verb:
+            return "The sentence is grammatically correct (Subject-Verb Agreement)."
+        else:
+            return "The sentence is grammatically incorrect (Subject-Verb Agreement mismatch)."
+    else:
+        return "Unable to determine subject-verb agreement."
+
+# Sample sentences for testing
+sentences = [
+    "The dog is running.",
+    "They are playing soccer.",
+    "She have a book.",
+    "I am going to the market.",
+    "The dogs was barking."
+]
+
+# Test the program with the sentences
+for sentence in sentences:
+    print(f"Sentence: {sentence}")
+    print(check_agreement(sentence))
+    print()
