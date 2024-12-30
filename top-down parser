@@ -1,0 +1,59 @@
+class TopDownParser:
+    def __init__(self, grammar):
+        self.grammar = grammar
+        self.input_string = ''
+        self.current_pos = 0
+
+    # Function to match a terminal symbol
+    def match(self, terminal):
+        if self.current_pos < len(self.input_string) and self.input_string[self.current_pos] == terminal:
+            self.current_pos += 1
+            return True
+        return False
+
+    # Parse function for the start symbol 'S'
+    def parse_S(self):
+        # S -> a A b
+        if self.match('a'):
+            if self.parse_A():
+                if self.match('b'):
+                    return True
+        return False
+
+    # Parse function for non-terminal 'A'
+    def parse_A(self):
+        # A -> c | ε
+        if self.match('c'):
+            return True
+        # A -> ε (empty production)
+        return True
+
+    # Function to start parsing
+    def parse(self, input_string):
+        self.input_string = input_string
+        self.current_pos = 0
+
+        if self.parse_S() and self.current_pos == len(self.input_string):
+            print("Parsing Successful")
+        else:
+            print("Parsing Failed")
+
+# Example usage of the parser
+if __name__ == "__main__":
+    # Define the grammar as a set of production rules
+    grammar = {
+        'S': ['a A b'],
+        'A': ['c', 'ε']
+    }
+
+    parser = TopDownParser(grammar)
+
+    # Sample input strings
+    input_string_1 = "acb"
+    input_string_2 = "ab"
+
+    print("Parsing string:", input_string_1)
+    parser.parse(input_string_1)
+
+    print("\nParsing string:", input_string_2)
+    parser.parse(input_string_2)
